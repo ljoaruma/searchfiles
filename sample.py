@@ -62,7 +62,7 @@ def changeFrame(tgt_frame, main_win, front_view=None):
     else:
         # 索引作成に切り替える場合
         main_win.state('normal')
-        main_win.geometry('560x200')
+        main_win.geometry('800x200')
         main_win.resizable(0, 0)
 
     # 指定フレームを上位層にする
@@ -352,7 +352,7 @@ class CreateFrame(ttk.Frame):
         self.dirlabel.pack(anchor=tk.W, side=tk.LEFT)
 
         self.dirvalue = tk.StringVar()
-        self.dirtext = ttk.Entry(self.frame2, style="", width=30, textvariable=self.dirvalue)
+        self.dirtext = ttk.Entry(self.frame2, style="", width=50, textvariable=self.dirvalue)
         self.dirtext.pack(anchor=tk.W, side=tk.LEFT)
 
         self.dirbtn = ttk.Button(self.frame2, text=u'選択', command= lambda : pushedSelectDir(self.dirbtn, self))
