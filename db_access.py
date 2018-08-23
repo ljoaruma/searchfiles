@@ -67,7 +67,7 @@ class DBAccess:
         (id INTEGER PRIMARY KEY, keyword TEXT, dir_path TEXT, file_name TEXT, row_no INTEGER, start INTEGER, end INTEGER)')
         # 削除結果テーブル
         self.execute('CREATE TABLE IF NOT EXISTS drop_result_table \
-        (id INTEGER PRIMARY KEY)')
+        (id INTEGER)')
 
     #------------------------------------------------------------------------------------
     # 検索処理
@@ -192,8 +192,7 @@ class DBAccess:
     #------------------------------------------------------------------------------------
     def delete_result_record(self, keyword, dir_path, file_name):
         # SQL発行
-        self.execute('INSERT OR IGNORE INTO drop_result_table SELECT id FROM result_table WHERE keyword="{0}" AND dir_path="{1}" AND file_name="{2}"'.format(keyword, dir_path, file_name))
-#        self.execute('SELECT id FROM result_table WHERE keyword="{0}" AND dir_path="{1}" AND file_name="{2}"'.format(keyword, dir_path, file_name))
+        self.execute('INSERT INTO drop_result_table SELECT id FROM result_table WHERE keyword="{0}" AND dir_path="{1}" AND file_name="{2}"'.format(keyword, dir_path, file_name))
 
     #------------------------------------------------------------------------------------
     # 全レコード削除処理
