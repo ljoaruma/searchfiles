@@ -14,25 +14,9 @@ import search_file
 import sample
 
 #------------------------------------------------------------------------------------
-# ファイル情報登録処理
+# ファイルリスト検索処理
 #------------------------------------------------------------------------------------
-def regist_file_info(dir_path, file_name):
-    # DB検索
-    rec = db_accessor.select_by_file_path(dir_path, file_name)
-
-    # ファイルの更新時刻(エポック秒)取得
-    mtime = os.path.getmtime(os.path.join(dir_path, file_name))
-
-    if rec: # 登録済みの場合
-        # 更新
-        db_accessor.update_file_record(dir_path, file_name, mtime)
-    else:   # 未登録の場合
-        # 追加
-        db_accessor.insert_file_record(dir_path, file_name, mtime)
-
-    # コミット
-    db_accessor.commit()
-
+#@profile
 def search_files(file_path_list, pattern):
     # 索引情報作成
     matched_array = []
@@ -58,6 +42,27 @@ def search_files(file_path_list, pattern):
             regist_result(pattern, dat['dir_path'], dat['file_name'], dat['line_number'], dat['start'], dat['end'])
 
 #------------------------------------------------------------------------------------
+# ファイル情報登録処理
+#------------------------------------------------------------------------------------
+#@profile
+def regist_file_info(dir_path, file_name):
+    # DB検索
+    rec = db_accessor.select_by_file_path(dir_path, file_name)
+
+    # ファイルの更新時刻(エポック秒)取得
+    mtime = os.path.getmtime(os.path.join(dir_path, file_name))
+
+    if rec: # 登録済みの場合
+        # 更新
+        db_accessor.update_file_record(dir_path, file_name, mtime)
+    else:   # 未登録の場合
+        # 追加
+        db_accessor.insert_file_record(dir_path, file_name, mtime)
+
+    # コミット
+    db_accessor.commit()
+
+#------------------------------------------------------------------------------------
 # 検索結果登録処理
 #------------------------------------------------------------------------------------
 def regist_result(keyword, dir_path, file_name, row_no, start, end):
@@ -72,6 +77,10 @@ def delete_result(keyword, dir_path, file_name):
     # コミット
     db_accessor.commit()
 
+#------------------------------------------------------------------------------------
+# 検索関数
+#------------------------------------------------------------------------------------
+#@profile
 def search_file_interface(directory, keyword):
     stratTime = time.time()
     db_accessor.insert_keyward(keyword)
