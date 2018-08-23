@@ -3,3 +3,5 @@ __pycache__/*
 *.swp
 .idea/
 test_enrty.py.lprof
+profile_report/*.txt
+
