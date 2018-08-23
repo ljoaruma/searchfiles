@@ -70,7 +70,6 @@ def regist_result(keyword, dir_path, file_name, row_no, start, end):
     # 検索結果登録
     db_accessor.insert_result_record(keyword, dir_path, file_name, row_no, start, end)
 
-#@profile
 def delete_result(keyword, dir_path, file_name):
     # 検索結果削除
     db_accessor.delete_result_record(keyword, dir_path, file_name)
