@@ -64,7 +64,7 @@ class DBAccess:
         (dir_path TEXT, file_name TEXT, mtime REAL)')
         # 索引付け結果テーブル作成
         self.execute('CREATE TABLE IF NOT EXISTS result_table \
-        (keyword TEXT, dir_path TEXT, file_name TEXT, row_no INTEGER, start INTEGER, end INTEGER)')
+        (keyword TEXT, dir_path TEXT, file_name TEXT, row_no INTEGER, start INTEGER, end INTEGER, is_delete INTEGER)')
 
     #------------------------------------------------------------------------------------
     # 検索処理
@@ -127,27 +127,22 @@ class DBAccess:
     #------------------------------------------------------------------------------------
     def select_result(self, keyword=None, dir_path=None, file_name=None):
         # SQL文生成
-        str_sql = 'SELECT * FROM result_table'
+        str_sql = 'SELECT * FROM result_table WHERE is_delete=0 '
 
         cnt_where = 0
 
-        if keyword or dir_path or file_name:
-            str_sql = str_sql + ' WHERE '
+#        if keyword or dir_path or file_name:
+#            str_sql = str_sql + ' WHERE '
 
         if keyword:
-            str_sql = str_sql + 'keyword="{}"'.format(keyword)
-            cnt_where = cnt_where + 1
+            str_sql = str_sql + ' AND keyword="{}"'.format(keyword)
 
         if dir_path:
-            if cnt_where > 0:
-                str_sql = str_sql + ' AND '
-            str_sql = str_sql + 'dir_path="{}"'.format(dir_path)
+            str_sql = str_sql + ' AND dir_path="{}"'.format(dir_path)
             cnt_where = cnt_where + 1
 
         if file_name:
-            if cnt_where > 0:
-                str_sql = str_sql + ' AND '
-            str_sql = str_sql + 'file_name="{}"'.format(file_name)
+            str_sql = str_sql + ' AND file_name="{}"'.format(file_name)
 
         # SQL発行
         return self.select(str_sql)
@@ -178,7 +173,7 @@ class DBAccess:
     #------------------------------------------------------------------------------------
     def insert_result_record(self, keyword, dir_path, file_name, row_no, start, end):
         # SQL発行
-        self.execute('INSERT INTO result_table VALUES ("{0}", "{1}", "{2}", {3}, {4}, {5})'.format(keyword, dir_path, file_name, row_no, start, end))
+        self.execute('INSERT INTO result_table VALUES ("{0}", "{1}", "{2}", {3}, {4}, {5}, {6})'.format(keyword, dir_path, file_name, row_no, start, end, 0))
 
     #------------------------------------------------------------------------------------
     # キーワード関連情報削除
@@ -193,7 +188,7 @@ class DBAccess:
     #------------------------------------------------------------------------------------
     def delete_result_record(self, keyword, dir_path, file_name):
         # SQL発行
-        self.execute('DELETE FROM result_table WHERE keyword="{0}" AND dir_path="{1}" AND file_name="{2}"'.format(keyword, dir_path, file_name))
+        self.execute('UPDATE result_table SET is_delete = 1 WHERE keyword="{0}" AND dir_path="{1}" AND file_name="{2}"'.format(keyword, dir_path, file_name))
 
     #------------------------------------------------------------------------------------
     # 全レコード削除処理
