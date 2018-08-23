@@ -242,14 +242,25 @@ def search_files(file_path_list, pattern):
         # ファイル情報をDBに登録
         regist_file_info(dir_path, file_name)
 
+    file_id = 0
+    current_file_name = ''
+    current_dir_path=''
+
     for matched in matched_array:
-        if matched:
+        #if matched:
             # 同一キーワード、同一ファイルの検索結果を削除
-            delete_result(pattern, matched[0]['dir_path'], matched[0]['file_name'])
+            # delete_result(pattern, matched[0]['dir_path'], matched[0]['file_name'])
+
+        new_file_name = dat['file_name']
+        new_dir_path = dat['dir_path']
+        if current_file_name != new_file_name or new_dir_path !=  current_dir_path:
+            new_file_id = db_accessor.get_file_record_id()
+            if new_file_id:
+                file_id = new_file_id
 
         # 検索結果登録
         for dat in matched:
-            regist_result(pattern, dat['dir_path'], dat['file_name'], dat['line_number'], dat['start'], dat['end'])
+            regist_result(pattern, file_id, dat['line_number'], dat['start'], dat['end'])
 
 #------------------------------------------------------------------------------------
 # ファイル情報登録処理

@@ -2,16 +2,9 @@
 
 import os
 import time
-import tkinter as tk
-import tkinter.ttk as ttk
-import tkinter.filedialog as fdialog
-import tkinter.messagebox as messagebox
-import tkinter.scrolledtext as tkst
-from tkinter import Toplevel
 
 import db_access
 import search_file
-import sample
 
 #------------------------------------------------------------------------------------
 # ファイルリスト検索処理
@@ -30,18 +23,23 @@ def search_files(file_path_list, pattern):
         dir_path = os.path.dirname(file_path)
         file_name = os.path.basename(file_path)
         # ファイル情報をDBに登録
-        regist_file_info(dir_path, file_name)
+        regist_file_info(pattern, dir_path, file_name)
 
     db_accessor.commit()
 
+    file_id = 0
     for matched in matched_array:
         if matched:
             # 同一キーワード、同一ファイルの検索結果を削除
-            delete_result(pattern, matched[0]['dir_path'], matched[0]['file_name'])
+            # delete_result(pattern, matched[0]['dir_path'], matched[0]['file_name'])
+
+            new_file_id = db_accessor.get_file_record_id(pattern, matched[0]['dir_path'], matched[0]['file_name'])
+            if new_file_id:
+                file_id = new_file_id[0][0]
 
         # 検索結果登録
         for dat in matched:
-            regist_result(pattern, dat['dir_path'], dat['file_name'], dat['line_number'], dat['start'], dat['end'])
+            regist_result(file_id, dat['line_number'], dat['start'], dat['end'])
 
     db_accessor.commit()
 
@@ -49,7 +47,7 @@ def search_files(file_path_list, pattern):
 # ファイル情報登録処理
 #------------------------------------------------------------------------------------
 #@profile
-def regist_file_info(dir_path, file_name):
+def regist_file_info(pattern, dir_path, file_name):
     # DB検索
     rec = db_accessor.select_by_file_path(dir_path, file_name)
 
@@ -58,17 +56,17 @@ def regist_file_info(dir_path, file_name):
 
     if rec: # 登録済みの場合
         # 更新
-        db_accessor.update_file_record(dir_path, file_name, mtime)
+        db_accessor.insert_key_file(pattern, dir_path, file_name, mtime)
     else:   # 未登録の場合
         # 追加
-        db_accessor.insert_file_record(dir_path, file_name, mtime)
+        db_accessor.update_key_file(pattern, dir_path, file_name, mtime)
 
 #------------------------------------------------------------------------------------
 # 検索結果登録処理
 #------------------------------------------------------------------------------------
-def regist_result(keyword, dir_path, file_name, row_no, start, end):
+def regist_result(file_id, row_no, start, end):
     # 検索結果登録
-    db_accessor.insert_result_record(keyword, dir_path, file_name, row_no, start, end)
+    db_accessor.insert_result_record(file_id, row_no, start, end)
 
 def delete_result(keyword, dir_path, file_name):
     # 検索結果削除
@@ -80,7 +78,7 @@ def delete_result(keyword, dir_path, file_name):
 #@profile
 def search_file_interface(directory, keyword):
     stratTime = time.time()
-    db_accessor.insert_keyward(keyword)
+    #db_accessor.insert_keyward(keyword)
 
     # 指定ディレクトリ下のファイルリスト取得
     file_list = search_file.get_file_list(directory)
