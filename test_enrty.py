@@ -105,7 +105,8 @@ if __name__ ==  "__main__":
     # コミット
     db_accessor.commit()
 
-    search_file_interface("/mnt/c/r/home/ryo/dev/procon/postgresql-10.4", "sql")
+    search_file_interface("/mnt/c/r/home/ryo/dev/procon/postgresql-10.4", "insert")
+    search_file_interface("/mnt/c/r/home/ryo/dev/procon/postgresql-10.4", "return")
 
     # DB切断
     db_accessor.close()
