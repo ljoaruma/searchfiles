@@ -1,3 +1,5 @@
 __pycache__/*
 *.sqlite
 *.swp
+.idea/
+test_enrty.py.lprof
