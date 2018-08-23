@@ -10,7 +10,7 @@ import search_file
 # ファイルリスト検索処理
 #------------------------------------------------------------------------------------
 #@profile
-def search_files(file_path_list, pattern):
+def search_files(file_path_list, pattern, db_accessor):
     # 索引情報作成
     matched_array = []
     for file_path in file_path_list:
@@ -23,7 +23,7 @@ def search_files(file_path_list, pattern):
         dir_path = os.path.dirname(file_path)
         file_name = os.path.basename(file_path)
         # ファイル情報をDBに登録
-        regist_file_info(pattern, dir_path, file_name)
+        regist_file_info(pattern, dir_path, file_name, db_accessor)
 
     db_accessor.commit()
 
@@ -33,13 +33,13 @@ def search_files(file_path_list, pattern):
             # 同一キーワード、同一ファイルの検索結果を削除
             # delete_result(pattern, matched[0]['dir_path'], matched[0]['file_name'])
 
-            new_file_id = db_accessor.get_file_record_id(pattern, matched[0]['dir_path'], matched[0]['file_name'])
+            new_file_id = db_accessor.get_update_counter(pattern, matched[0]['dir_path'], matched[0]['file_name'])
             if new_file_id:
                 file_id = new_file_id[0][0]
 
         # 検索結果登録
         for dat in matched:
-            regist_result(file_id, dat['line_number'], dat['start'], dat['end'])
+            regist_result(file_id, dat['line_number'], dat['start'], dat['end'], db_accessor)
 
     db_accessor.commit()
 
@@ -47,7 +47,7 @@ def search_files(file_path_list, pattern):
 # ファイル情報登録処理
 #------------------------------------------------------------------------------------
 #@profile
-def regist_file_info(pattern, dir_path, file_name):
+def regist_file_info(pattern, dir_path, file_name, db_accessor):
     # DB検索
     rec = db_accessor.select_by_file_path(dir_path, file_name)
 
@@ -64,7 +64,7 @@ def regist_file_info(pattern, dir_path, file_name):
 #------------------------------------------------------------------------------------
 # 検索結果登録処理
 #------------------------------------------------------------------------------------
-def regist_result(file_id, row_no, start, end):
+def regist_result(file_id, row_no, start, end, db_accessor):
     # 検索結果登録
     db_accessor.insert_result_record(file_id, row_no, start, end)
 
@@ -76,7 +76,7 @@ def delete_result(keyword, dir_path, file_name):
 # 検索関数
 #------------------------------------------------------------------------------------
 #@profile
-def search_file_interface(directory, keyword):
+def search_file_interface(directory, keyword, db_accessor):
     stratTime = time.time()
     #db_accessor.insert_keyward(keyword)
 
@@ -84,7 +84,7 @@ def search_file_interface(directory, keyword):
     file_list = search_file.get_file_list(directory)
 
     # 検索、索引作成
-    search_files(file_list, keyword)
+    search_files(file_list, keyword, db_accessor)
 
     endTime = time.time()
     print('処理時間（索引作成）：{}[sec]'.format(endTime - stratTime))
@@ -100,8 +100,8 @@ if __name__ ==  "__main__":
     # コミット
     db_accessor.commit()
 
-    search_file_interface("/mnt/c/r/home/ryo/dev/procon/postgresql-10.4", "insert")
-    search_file_interface("/mnt/c/r/home/ryo/dev/procon/postgresql-10.4", "return")
+    search_file_interface("/mnt/c/r/home/ryo/dev/procon/postgresql-10.4", "insert", db_accessor)
+    search_file_interface("/mnt/c/r/home/ryo/dev/procon/postgresql-10.4", "return", db_accessor)
 
     # DB切断
     db_accessor.close()

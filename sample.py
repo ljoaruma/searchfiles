@@ -9,7 +9,7 @@ import tkinter.scrolledtext as tkst
 from tkinter import Toplevel
 
 import db_access
-import search_file
+import found_register
 
 #------------------------------------------------------------------------------------
 # 索引キーワード取得処理
@@ -96,13 +96,14 @@ def pushedCreate(self, frame_create):
         frame_create.deleteallbtn.configure(state=tk.DISABLED)
 
         # 索引キーワード登録
-        db_accessor.insert_keyward(strkey)
+        #db_accessor.insert_keyward(strkey)
 
         # 指定ディレクトリ下のファイルリスト取得
-        file_list = search_file.get_file_list(strdir)
+        #file_list = search_file.get_file_list(strdir)
 
         # 検索、索引作成
-        search_files(file_list, strkey)
+        #search_files(file_list, strkey)
+        found_register.search_file_interface(strdir, strkey, db_accessor)
 
         # DBから索引キーワードを取得して、コンボボックスへ設定
         frame_create.keycb['values'] = tuple(getKeys())
@@ -223,82 +224,6 @@ def viewResult(self, key=None, dir_path=None, file_name=None):
 
         endTime = time.time()
         print('処理時間（索引表示）：{}[sec]'.format(endTime-stratTime))
-
-#------------------------------------------------------------------------------------
-# ファイルリスト検索処理
-#------------------------------------------------------------------------------------
-def search_files(file_path_list, pattern):
-    # 索引情報作成
-    matched_array = []
-    for file_path in file_path_list:
-        # 検索
-        matched = search_file.search(file_path, pattern)
-        matched_array.append(matched)
-
-    for file_path in file_path_list:
-        # ディレクトリパスとファイル名に分離
-        dir_path = os.path.dirname(file_path)
-        file_name = os.path.basename(file_path)
-        # ファイル情報をDBに登録
-        regist_file_info(dir_path, file_name)
-
-    file_id = 0
-    current_file_name = ''
-    current_dir_path=''
-
-    for matched in matched_array:
-        #if matched:
-            # 同一キーワード、同一ファイルの検索結果を削除
-            # delete_result(pattern, matched[0]['dir_path'], matched[0]['file_name'])
-
-        new_file_name = dat['file_name']
-        new_dir_path = dat['dir_path']
-        if current_file_name != new_file_name or new_dir_path !=  current_dir_path:
-            new_file_id = db_accessor.get_file_record_id()
-            if new_file_id:
-                file_id = new_file_id
-
-        # 検索結果登録
-        for dat in matched:
-            regist_result(pattern, file_id, dat['line_number'], dat['start'], dat['end'])
-
-#------------------------------------------------------------------------------------
-# ファイル情報登録処理
-#------------------------------------------------------------------------------------
-def regist_file_info(dir_path, file_name):
-    # DB検索
-    rec = db_accessor.select_by_file_path(dir_path, file_name)
-
-    # ファイルの更新時刻(エポック秒)取得
-    mtime = os.path.getmtime(os.path.join(dir_path, file_name))
-
-    if rec: # 登録済みの場合
-        # 更新
-        db_accessor.update_file_record(dir_path, file_name, mtime)
-    else:   # 未登録の場合
-        # 追加
-        db_accessor.insert_file_record(dir_path, file_name, mtime)
-
-    # コミット
-    db_accessor.commit()
-
-#------------------------------------------------------------------------------------
-# 検索結果登録処理
-#------------------------------------------------------------------------------------
-def regist_result(keyword, dir_path, file_name, row_no, start, end):
-    # 検索結果登録
-    db_accessor.insert_result_record(keyword, dir_path, file_name, row_no, start, end)
-    # コミット
-    db_accessor.commit()
-
-#------------------------------------------------------------------------------------
-# 検索結果削除処理
-#------------------------------------------------------------------------------------
-def delete_result(keyword, dir_path, file_name):
-    # 検索結果削除
-    db_accessor.delete_result_record(keyword, dir_path, file_name)
-    # コミット
-    db_accessor.commit()
 
 #------------------------------------------------------------------------------------
 # メインフレームクラス

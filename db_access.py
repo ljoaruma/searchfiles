@@ -185,7 +185,7 @@ class DBAccess:
     #------------------------------------------------------------------------------------
     # ファイルID取得
     #------------------------------------------------------------------------------------
-    def get_file_record_id(self, pattern, dir_path, file_name):
+    def get_update_counter(self, pattern, dir_path, file_name):
         # SQL発行
         return self.select('SELECT update_counter_table.update_counter FROM update_counter_table, key_table, file_table   \
         WHERE key_table.id = update_counter_table.keyword_id AND   \
